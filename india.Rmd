@@ -1,0 +1,1295 @@
+---
+title: "Covid-19 Data Visualization Dashboard of India"
+
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+
+
+
+    
+---
+
+
+```{r setup, include=FALSE}
+#importing libraries
+library(flexdashboard)
+library(knitr)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(DT)
+library(viridis)
+library(gt)
+library(tidyverse)
+library(highcharter)
+library(hrbrthemes)
+library(htmltools)
+library(htmltools)
+library(sf)
+library(rvest)
+library(ggrepel)
+library(ggthemes)
+library(geojsonio)
+
+
+```
+
+
+```{r}
+# cleaning the data as the data is in a comma formatted numbers and hence we need to convert it into a number format so # # that we can make graphs and do calculations with it
+
+df <-  read.csv("indiadata.csv", header=T)
+
+
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214,Precaution1859,Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+
+
+# Convert Date column to Date format (if not already)
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+Overview
+===============================================
+
+
+Column {data-width=50}
+--------------------------------------------------------------------------
+
+### COVID-19 Cases in India
+```{r}
+valueBox("45,001,456", icon = "fa-rupee-sign", color= "#FFA500")
+```
+
+### Deaths in India  due to COVID-19
+```{r}
+valueBox("533,295", icon = "fa-rupee-sign", color= "#960018")
+
+```
+
+### People recovered in India
+```{r}
+valueBox("44,481,893", icon = "fa-rupee-sign", color= "#00308F")
+
+```
+
+### Total COVID-19 vaccine doses administered in India
+```{r}
+valueBox("2.21 bn", icon = "fa-rupee-sign", color= "#FFFDD0")
+```
+
+### Percentage of Population Vaccinated 
+```{r}
+valueBox("69%", icon = "fa-rupee-sign", color= "#023020")
+```
+
+
+Column{.tabset .tabset-fade data-width=550}
+------------------------------------------------------------------------
+
+### Cases
+
+
+
+```{r}
+
+# Load data and format Date column
+df <- read.csv("who.csv", header = TRUE)
+df$Date <- as.Date(df$Date, format = "%d/%m/%Y")
+
+# Create the highchart object for Cases over Time
+highchart() %>%
+  hc_chart(
+    type = "line"  # Set chart type to line
+  ) %>%
+  hc_title(text = "Cases Over Time")%>%  # Set chart title
+  hc_xAxis(categories = df$Date)%>%  # Set x-axis categories to Date column
+  hc_yAxis(title = list(text = "No of Cases"))%>%  # Set y-axis title
+  hc_series(list(name = "Cases", data = df$New_cases_ind))%>%  # Add series for Cases data
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",  # Credits to WHO
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"  # WHO data source
+  )
+
+
+
+```
+
+### Deaths
+```{r}
+# Load data and format Date column
+df <-  read.csv("who.csv", header=T)
+df$Date <- as.Date(df$Date,format = "%d/%m/%Y")
+
+# Create the highchart object for Deaths over Time
+highchart() %>%
+  hc_chart(type = "line") %>%
+  hc_title(text = " Deaths Over Time") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "No of Deaths")) %>%
+  hc_series(list(name = "Deaths", data = df$New_deaths_ind)) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",  # Credits to WHO
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"  # WHO data source
+  )
+
+
+
+
+```
+
+Column{data-width=400}
+------------------------------------
+
+
+### Cumulative Cases in India
+    
+```{r}
+# Load data and format Date column
+df <-  read.csv("who.csv", header=T)
+df$Date <- as.Date(df$Date,format = "%d/%m/%Y")
+
+# Create the highchart object for Cumulative Cases over Time
+highchart() %>%
+  hc_chart(type = "line") %>%
+  hc_title(text = "Cumulative Cases Over Time") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "Cumulative Cases")) %>%
+  hc_series(list(name = "Cumulative Cases", data = df$Cumulative_cases)) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",  # Credits to WHO
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"  # WHO data source
+  )
+
+```
+    
+### Cumulative Deaths in India
+
+```{r}
+
+# Load data and format Date column
+df <-  read.csv("who.csv", header=T)
+df$Date <- as.Date(df$Date,format = "%d/%m/%Y")
+
+# Create the highchart object for Cumulative Deaths over Time
+highchart() %>%
+  hc_chart(type = "line") %>%
+  hc_title(text = "Cumulative Deaths Over Time") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "Cumulative Deaths")) %>%
+  hc_series(list(name = "Cumulative Deaths", data = df$Cumulative_deaths)) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",  # Credits to WHO
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"  # WHO data source
+  )
+
+```
+
+
+Statewise Visualisation
+=====================================================
+
+Column {.tabset .tabset-fade data-width=400}
+--------------------------------------------------
+    
+### Cases 
+    
+```{r}
+# Load the data
+df <- read.csv("indiadata.csv", header=T)
+
+# Convert certain columns to numeric by removing commas
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Reshape dataframe from wide to long format
+df_long <- pivot_longer(df, cols = c(Totalcases, Discharged), names_to = "Category", values_to = "Value")
+
+# Create a bar chart using highcharter
+hchart(df_long, "bar", hcaes(x = State, y = Value, group = Category)) %>%
+  hc_title(text = "Comparison of Cases and Recovery By States") %>%
+  hc_subtitle(text = "Grouped Column Chart") %>%
+  hc_xAxis(title = list(text = "State")) %>%
+  hc_yAxis(title = list(text = "Comparison of Cases and Recovery ")) %>%
+  hc_legend(enabled = TRUE) %>%
+  hc_colors(c("Totalcases" = "red", "Discharged" = "blue"))%>%  # Specify custom colors for Totalcases and Discharged bars
+  hc_chart(zoomType = "xy")%>%  # Enable zooming functionality
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "ndtv",  # Credits to ndtv
+    href = "https://www.ndtv.com/coronavirus/india-covid-19-tracker"  # Link to ndtv source
+  )
+
+
+
+
+
+```
+
+
+
+### Deaths
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Sort the dataframe by Deaths column in descending order
+df <- df %>%
+  arrange(desc(Deaths))
+
+# Create a pie chart using highcharter
+highchart() %>%
+  hc_chart(type = "pie") %>%
+  hc_title(text = "Pie Chart of Deaths by State") %>%
+  hc_add_series(data = list_parse2(df[, c("State", "Deaths")])) %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.name}:</b> {point.y} Deaths"  # Specify tooltip format
+  ) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "ndtv",  # Credits to ndtv
+    href = "https://www.ndtv.com/coronavirus/india-covid-19-tracker"  # Link to ndtv source
+  )
+
+
+
+```
+
+### PofCases
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+# Calculate Cases per Capita and round to 2 decimal places
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))),
+         Cases_Per_Capita = round(Totalcases / Population, 2)
+  )
+
+# Create a treemap
+hchart(df, "treemap", hcaes(x = State, value = Cases_Per_Capita, color = Cases_Per_Capita)) %>%
+  hc_title(text = "Probability of State affected by COVID-19") %>%
+  hc_subtitle(text = "Treemap") %>%
+  hc_colorAxis(minColor = "#FFFFFF", maxColor = "skyblue") %>%  # Customize color axis
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+
+```
+
+
+### PofDeath
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+# Calculate Cases per Capita and round to 5 decimal places
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))),
+         Cases_Per_Capita = round(Deaths / Population, 5)
+  )
+
+# Create a treemap
+hchart(df, "treemap", hcaes(x = State, value = Cases_Per_Capita, color = Cases_Per_Capita)) %>%
+  hc_title(text = "Probability of State deaths by COVID-19") %>%
+  hc_subtitle(text = "Treemap") %>%
+  hc_colorAxis(minColor = "#FFFFFF", maxColor = "red") %>%  # Customize color axis
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+```
+
+### PofRecovery
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+# Calculate Cases per Capita (Recovered) and round to 5 decimal places
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))),
+         Cases_Per_Capita = round(Discharged / Population, 5)
+  )
+
+# Create a treemap
+hchart(df, "treemap", hcaes(x = State, value = Cases_Per_Capita, color = Cases_Per_Capita)) %>%
+  hc_title(text = "Probability of State Recovered by COVID-19") %>%
+  hc_subtitle(text = "Treemap") %>%
+  hc_colorAxis(minColor = "#FFFFFF", maxColor = "lightgreen") %>%  # Customize color axis
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+```
+
+
+
+Column{data-width= 200}
+-------------------------------------
+
+### Vaccination
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Create a treemap
+hchart(df, "treemap", hcaes(x = State, value = Vaccination, color = Vaccination)) %>%
+  hc_title(text = "Vaccinations by State") %>%
+  hc_subtitle(text = "Treemap") %>%
+  hc_colorAxis(minColor = "#FFFFFF", maxColor = "darkgreen") %>%  # Customize color axis
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+
+```
+
+
+
+### Statewise Recovery 
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Calculate mean of discharge ratio and death ratio
+a <- mean(df$Discharge.Ratio) * 100
+b <- mean(df$Deathratio) * 100
+
+# Define custom colors for the pie chart
+custom_colors <- viridis::plasma(n = 2)
+
+# Create a dataframe with labels and proportions
+df <- data.frame(Label = c("Recovery Ratio", "Death Ratio"),
+                 Proportion = c(98.89, 1.11))
+
+# Create a pie chart
+df %>%
+  hchart(type = "pie", hcaes(x = Label, y = Proportion, color = custom_colors)) %>%
+  
+  # Add Google theme
+  hc_add_theme(hc_theme_google()) %>%
+  
+  # Set chart title and subtitle
+  hc_title(text = "Effect of Covid 19 on the Indian Population") %>%
+  hc_subtitle(text = "Proportions in Percentage") %>%
+  
+  # Define tooltip format
+  hc_tooltip(pointFormat = "<b>{point.name}:</b> {point.percentage:.2f}%") %>%
+  
+  # Enable legend
+  hc_legend(enabled = TRUE) %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+```
+
+Column{.tabset .tabset-fade data-width=400}
+--------------------------------------------------------------
+
+### Vaccinations by Top 20 States
+
+```{r}
+
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Sort the dataframe by Vaccination column in descending order and select top 20 rows
+df <- df %>% 
+  arrange(desc(Vaccination)) %>%
+  head(20)
+
+# Reshape dataframe from wide to long format
+df_long <- pivot_longer(df, cols = c(Doseone, Dosetwo), names_to = "Category", values_to = "Value")
+
+# Create a grouped column chart
+hchart(df_long, "column", hcaes(x = State, y = Value, group = Category)) %>%
+  
+  # Set chart title and subtitle
+  hc_title(text = "Vaccination Status by State") %>%
+  hc_subtitle(text = "Grouped Column Chart") %>%
+  
+  # Set x-axis and y-axis titles
+  hc_xAxis(title = list(text = "State")) %>%
+  hc_yAxis(title = list(text = "Vaccination Count")) %>%
+  
+  # Enable legend
+  hc_legend(enabled = TRUE) %>%
+  
+  # Set colors for the categories
+  hc_colors(c("Doseone" = "red", "Dosetwo" = "blue")) %>%
+  
+  # Enable zooming
+  hc_chart(zoomType = "xy") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",  # Credits to mygov.in
+    href = "https://www.mygov.in/covid-19/"  # Link to mygov.in source
+  )
+
+
+
+
+```
+
+
+### Age(15-18)
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Arrange dataframe by descending Vaccination count and select top 20
+df <- df %>% 
+  arrange(desc(Vaccination)) %>%
+  head(20)
+
+# Reshape dataframe from wide to long format
+df_long <- pivot_longer(df, cols = c(Doseone1518, Dosetwo1518), names_to = "Category", values_to = "Value")
+
+# Create a grouped column chart
+hchart(df_long, "column", hcaes(x = State, y = Value, group = Category)) %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Vaccination Status by Age(15-18) in States of India") %>%
+  hc_xAxis(title = list(text = "State")) %>%
+  hc_yAxis(title = list(text = "Vaccination Count")) %>%
+  
+  # Enable legend and define colors for each category
+  hc_legend(enabled = TRUE) %>%
+  hc_colors(c("Doseone1518" = "green", "Dosetwo1518" = "orange")) %>%
+  
+  # Enable zoom functionality
+  hc_chart(zoomType = "xy") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",
+    href = "https://www.mygov.in/covid-19/"
+  )
+
+```
+
+
+### Age(12-14)
+
+```{r}
+# Read the dataset
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert character columns with commas to numeric
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination,
+                  Doseone, Dosetwo, Doseone1518, Dosetwo1518, Doseone1214, Dosetwo1214, Precaution1859, Precaution),
+                ~ as.numeric(gsub(",", "", .))))
+
+# Arrange dataframe by descending Vaccination count and select top 20
+df <- df %>% 
+  arrange(desc(Vaccination)) %>%
+  head(20)
+
+# Reshape dataframe from wide to long format
+df_long <- pivot_longer(df, cols = c(Doseone1214, Dosetwo1214), names_to = "Category", values_to = "Value")
+
+# Create a grouped column chart
+hchart(df_long, "column", hcaes(x = State, y = Value, group = Category)) %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Vaccination Status by Age(12-14) in States of India") %>%
+  hc_xAxis(title = list(text = "State")) %>%
+  hc_yAxis(title = list(text = "Vaccination Count")) %>%
+  
+  # Enable legend and define colors for each category
+  hc_legend(enabled = TRUE) %>%
+  hc_colors(c("Doseone1214" = "purple", "Dosetwo1214" = "brown")) %>%
+  
+  # Enable zoom functionality
+  hc_chart(zoomType = "xy") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "mygov.in",
+    href = "https://www.mygov.in/covid-19/"
+  )
+
+```
+
+
+
+
+Comparitive Analysis (Ind/Usa)
+===============================================
+
+
+##Column {data-width=200}
+------------------------------------------------------------------------
+
+### INDIA Vs USA
+
+
+```{r}
+
+# Load data from CSV file
+df <- read.csv("usd.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas)
+df <- df %>%
+  mutate(across(c(Cases, Deaths, Vaciinationsadministred, Percentage, Partially, Fully), 
+                ~ as.numeric(gsub(",", "", .))))
+
+# Create the bar chart
+hchart(df, "bar", hcaes(x = Country, y = Cases)) %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Cases") %>%
+  hc_xAxis(title = list(text = "Country")) %>%
+  hc_yAxis(title = list(text = "People Count")) %>%
+  
+  # Enable legend and define colors
+  hc_legend(enabled = TRUE) %>%
+  hc_colors("blue") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "JohnHopkins",
+    href = "https://coronavirus.jhu.edu/covid-19-daily-video"
+  )
+
+
+
+
+
+
+```
+
+
+
+
+### 
+
+
+```{r}
+# Load data from CSV file
+df <- read.csv("usd.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas)
+df <- df %>%
+  mutate(across(c(Cases, Deaths, Vaciinationsadministred, Percentage, Partially, Fully), 
+                ~ as.numeric(gsub(",", "", .))))
+
+# Create the bar chart
+hchart(df, "bar", hcaes(x = Country, y = Deaths)) %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Deaths") %>%
+  hc_xAxis(title = list(text = "Country")) %>%
+  hc_yAxis(title = list(text = "People Count")) %>%
+  
+  # Enable legend and define colors
+  hc_legend(enabled = TRUE) %>%
+  hc_colors("red") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "JohnHopkins",
+    href = "https://coronavirus.jhu.edu/covid-19-daily-video"
+  )
+
+
+
+
+```
+
+
+### 
+
+
+```{r}
+
+
+# Load data from CSV file
+df <- read.csv("usd.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas)
+df <- df %>%
+  mutate(across(c(Cases, Deaths, Vaciinationsadministred, Percentage, Partially, Fully), 
+                ~ as.numeric(gsub(",", "", .))))
+
+# Create the bar chart
+hchart(df, "bar", hcaes(x = Country, y = Vaciinationsadministred)) %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Vaccines") %>%
+  hc_xAxis(title = list(text = "Country")) %>%
+  hc_yAxis(title = list(text = "Vaccines Administered")) %>%
+  
+  # Enable legend and define colors
+  hc_legend(enabled = TRUE) %>%
+  hc_colors("darkgreen") %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "CDC",
+    href = "https://covid.cdc.gov/covid-data-tracker/#vaccinations_vacc-people-booster-percent-pop5"
+  )
+
+
+
+
+
+
+
+```
+
+
+
+##Column {.tabset .tabset-fade data-width=450}
+------------------------------------------------------------------------
+
+### Daily Cases
+
+```{r}
+# Read the dataset
+df <- read.csv("who.csv", header = TRUE)
+
+# Convert the 'Date' column to Date format
+df$Date <- as.Date(df$Date, format = "%d/%m/%Y")
+
+# Create the highchart object
+highchart() %>%
+  hc_chart(type = "line") %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Comparision of Daily Cases of India & USA") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "Cases")) %>%
+  
+  # Add series for USA and India
+  hc_series(list(name = "Usa", data = df$New_cases_usa),
+            list(name = "India", data = df$New_cases_ind)) %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Enable zooming
+  hc_chart(zoomType = "xy") %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"
+  )
+
+
+```
+
+
+### Cumalative Cases
+
+```{r}
+# Read the dataset
+df <- read.csv("who.csv", header = TRUE)
+
+# Convert the 'Date' column to Date format
+df$Date <- as.Date(df$Date, format = "%d/%m/%Y")
+
+# Create the highchart object
+highchart() %>%
+  hc_chart(type = "line") %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Cumulative Cases Over Time") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "Cumulative Cases")) %>%
+  
+  # Add series for India and USA
+  hc_series(list(name = "India", data = df$Cumulative_cases),
+            list(name = "USA", data = df$Cumulative_cases_usa)) %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"
+  )
+
+
+
+```
+
+### Cumalative Deaths
+
+```{r}
+# Read the dataset
+df <- read.csv("who.csv", header = TRUE)
+
+# Convert the 'Date' column to Date format
+df$Date <- as.Date(df$Date, format = "%d/%m/%Y")
+
+# Create the highchart object
+highchart() %>%
+  hc_chart(type = "line") %>%
+  
+  # Set chart title and axis titles
+  hc_title(text = "Cumulative Deaths Over Time") %>%
+  hc_xAxis(categories = df$Date) %>%
+  hc_yAxis(title = list(text = "Cumulative Cases")) %>%
+  
+  # Add series for India and USA
+  hc_series(list(name = "India", data = df$Cumulative_deaths),
+            list(name = "USA", data = df$Cumulative_deaths_usa)) %>%
+  
+  # Enable exporting functionality
+  hc_exporting(
+    enabled = TRUE
+  ) %>%
+  
+  # Add credits
+  hc_credits(
+    enabled = TRUE,
+    text = "WHO",
+    href = "https://data.who.int/dashboards/covid19/cases?m49=356&n=c"
+  )
+
+```
+
+
+
+
+
+
+
+##Column {.tabset .tabset-fade data-width=350}
+------------------------------------------------------------------------
+
+### Case Analysis
+
+```{r}
+
+# Load data from CSV files
+df <- read.csv("indiadata.csv", header = TRUE)
+d1 <- read.csv("usadata.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas)
+df <- df %>%
+  mutate(across(c(Totalcases), ~ as.numeric(gsub(",", "", .)))) %>%
+  arrange(desc(Totalcases)) %>%
+  head(20)
+
+d1 <- d1 %>%
+  mutate(across(c(Cases), ~ as.numeric(gsub(",", "", .)))) %>%
+  arrange(desc(Cases)) %>%
+  head(20)
+
+# Concatenate state names for x-axis labels
+concatenated_states <- paste(df$State, d1$State, sep = ", ")
+
+# Scale down the case counts for better visualization
+df$cases_scaled <- round(df$Totalcases / 100000)
+d1$cases_scaled <- round(d1$Cases / 100000)
+
+# Create stacked column chart
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_title(text = "Comparison of Cases by State") %>%
+  hc_subtitle(text = "in India and USA") %>%
+  hc_xAxis(categories = concatenated_states) %>%
+  hc_yAxis(title = list(text = "Case Count (per 100,000)")) %>%
+  hc_plotOptions(column = list(
+    stacking = "normal"  # Stack bars
+  )) %>%
+  hc_add_series(name = "India", data = df$cases_scaled) %>%
+  hc_add_series(name = "USA", data = d1$cases_scaled) %>%
+  hc_chart(zoomType = "xy") %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "usafacts",
+    href = "https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/")
+
+  
+```
+
+### Vaccination Analysis
+
+```{r}
+library(highcharter)
+# Load data from CSV files
+df <- read.csv("indiadata.csv", header = TRUE)
+d1 <- read.csv("usadata.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas)
+df <- df %>%
+  mutate(across(c(Vaccination), ~ as.numeric(gsub(",", "", .)))) %>%
+  arrange(desc(Vaccination)) %>%
+  head(20)
+
+d1 <- d1 %>%
+  mutate(across(c(Vaccination), ~ as.numeric(gsub(",", "", .)))) %>%
+  arrange(desc(Vaccination)) %>%
+  head(20)
+
+# Concatenate state names
+concatenated_states <- paste(df$State, d1$State, sep = ", ")
+
+# Scale values to per 100,000
+df$Vaccination_scaled <- round(df$Vaccination / 100000)
+d1$Vaccination_scaled <- round(d1$Vaccination / 100000)
+
+# Create stacked column chart
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_title(text = "Comparison of Vaccination by State") %>%
+  hc_subtitle(text = "in India and USA") %>%
+  hc_xAxis(categories = concatenated_states) %>%
+  hc_yAxis(title = list(text = "Vaccination Count (per 100,000)")) %>%
+  hc_plotOptions(column = list(
+    stacking = "normal"  # Stack bars
+  )) %>%
+  hc_add_series(name = "India", data = df$Vaccination_scaled) %>%
+  hc_add_series(name = "USA", data = d1$Vaccination_scaled) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_chart(zoomType = "xy") %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "ourworldindata",
+    href = "https://ourworldindata.org/explorers/us-covid-data-explorer?tab=table&facet=none&country=USA~California~Florida~Illinois~Pennsylvania~GEO~North+Carolina~Ohio~New+York+State~Texas~Virginia~Washington~New+Jersey~Arizona~Michigan&pickerSort=desc&pickerMetric=total_vaccinations_per_hundred&hideControls=false&Metric=People+fully+vaccinated&Interval=Cumulative&Relative+to+Population=true"
+  )
+
+
+
+```
+
+
+### Probablity Analysis
+
+```{r}
+# Load data from CSV files
+df <- read.csv("indiadata.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas) and calculate cases per capita
+df <- df %>%
+  mutate(across(c(Totalcases, Discharged, Deaths, Population, Vaccination),
+                ~ as.numeric(gsub(",", "", .))),
+         Cases_Per_Capita = round(Totalcases / Population, 2)
+  )
+
+# Read data for USA
+d1 <- read.csv("usadata.csv", header = TRUE)
+
+# Convert relevant columns to numeric (remove commas) and calculate cases per capita
+d1 <- d1 %>%
+  mutate(across(c(Cases, Populationestimate), ~ as.numeric(gsub(",", "", .))),
+         Cases_Per_Capita = round(Cases / Populationestimate, 2)) %>%
+  arrange(desc(Cases_Per_Capita)) %>%
+  head(20)
+
+# Concatenate state names
+concatenated_states <- paste(df$State, d1$State, sep = ", ")
+
+# Create stacked column chart
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_title(text = "Probability Analysis of States Affected in India and USA") %>%
+  hc_xAxis(categories = concatenated_states) %>%
+  hc_yAxis(title = list(text = "Probability")) %>%
+  hc_plotOptions(column = list(
+    stacking = "normal"  # Stack bars
+  )) %>%
+  hc_add_series(name = "India", data = df$Cases_Per_Capita) %>%
+  hc_add_series(name = "USA", data = d1$Cases_Per_Capita) %>%
+  hc_exporting(
+    enabled = TRUE  # Enable exporting functionality
+  ) %>%
+  hc_chart(zoomType = "xy") %>%
+  hc_credits(
+    enabled = TRUE,
+    text = "ourworldindata",
+    href = "https://ourworldindata.org/explorers/us-covid-data-explorer?tab=table&facet=none&country=USA~California~Florida~Illinois~Pennsylvania~GEO~North+Carolina~Ohio~New+York+State~Texas~Virginia~Washington~New+Jersey~Arizona~Michigan&pickerSort=desc&pickerMetric=total_vaccinations_per_hundred&hideControls=false&Metric=People+fully+vaccinated&Interval=Cumulative&Relative+to+Population=true"
+  )
+
+
+
+
+```
+
+
+
+
+
+
+Map Analysis
+=====================================================
+
+Column{.tabset .tabset-fade data-width=500}
+--------------------------------------------------------------
+
+### Covid-19 Cases(India) 
+
+```{r}
+
+mapdata <- get_data_from_map(download_map_data("https://code.highcharts.com/mapdata/countries/in/custom/in-all-andaman-and-nicobar.js"))
+
+State <- c("AN", "AP", "AR", "AS", "BR", "CH", "CT", "DA", "DL", "DN", 
+           "GA", "GU", "HP", "HR", "JH", "JK", "KA", "KL", "LD", "MH", 
+           "ML", "MN", "MP", "MZ", "NL", "NU", "OR", "PB", "PY", "RJ", 
+           "SK", "TN", "TR", "UP", "UT", "WB")
+
+# Create the Totalcases vector
+
+Totalcases <- c(10766, 3185164,67049 , 746165, 855267, 100699
+                 ,1187697 ,11592,2041112,11592, 263375, 1291459 
+                 ,322943,1078968,443831,482039,4088910 
+                 ,6907579 ,11415 ,8171926 ,96990,140034 
+                 ,1056554  ,239562  ,36033,29625 ,1348440  ,177551  ,793670 
+                 ,1326467  ,44932  ,3610743  
+                 ,108495 ,2145501  ,452588 ,2126540)
+
+deaths <- c(129, 18844, 296, 8035, 12314, 1185, 14190, 2, 26666,2, 4014, 
+            11080, 4245, 10779,5334,4792, 40359, 72043,52,148563, 
+            1628,2149,10786 , 734, 782,231, 9215, 20569, 1981,
+            9736, 501, 38081, 942, 23713, 7768, 21555)
+
+# Create the data frame
+State_pop <- data.frame(State = State, Totalcases = Totalcases,Deaths=deaths)
+
+# Assuming State_pop is your data frame
+
+
+
+
+
+
+map_chart <- hcmap("https://code.highcharts.com/mapdata/countries/in/custom/in-all-andaman-and-nicobar.js", 
+                   # Assuming this URL is correct for the map data of India
+                   data = State_pop,  # Your State population data
+                   value = "Totalcases",# Column containing the total COVID cases
+                   joinBy = c("hc-a2", "State"),  # Join data by state code and state name
+                   name = "Covid Cases",  # Name for the series
+                   dataLabels = list(enabled = TRUE, format = '{point.name}'),
+                   borderColor = "#FAFAFA",  # Border color for the map
+                   borderWidth = 0.1,  # Border width for the map
+                   tooltip = list(valueDecimals = 0))  # Tooltip settings
+
+hc_mapNavigation(map_chart, enabled = TRUE)
+
+
+
+```
+
+
+
+
+
+### Covid-19 Deaths(India) 
+
+```{r}
+
+mapdata <- get_data_from_map(download_map_data("https://code.highcharts.com/mapdata/countries/in/custom/in-all-andaman-and-nicobar.js"))
+
+State <- c("AN", "AP", "AR", "AS", "BR", "CH", "CT", "DA", "DL", "DN", 
+           "GA", "GU", "HP", "HR", "JH", "JK", "KA", "KL", "LD", "MH", 
+           "ML", "MN", "MP", "MZ", "NL", "NU", "OR", "PB", "PY", "RJ", 
+           "SK", "TN", "TR", "UP", "UT", "WB")
+
+# Create the Totalcases vector
+
+Totalcases <- c(10766, 3185164,67049 , 746165, 855267, 100699
+                 ,1187697 ,11592,2041112,11592, 263375, 1291459 
+                 ,322943,1078968,443831,482039,4088910 
+                 ,6907579 ,11415 ,8171926 ,96990,140034 
+                 ,1056554  ,239562  ,36033,29625 ,1348440  ,177551  ,793670 
+                 ,1326467  ,44932  ,3610743  
+                 ,108495 ,2145501  ,452588 ,2126540)
+
+deaths <- c(129, 18844, 296, 8035, 12314, 1185, 14190, 2, 26666,2, 4014, 
+            11080, 4245, 10779,5334,4792, 40359, 72043,52,148563, 
+            1628,2149,10786 , 734, 782,231, 9215, 20569, 1981,
+            9736, 501, 38081, 942, 23713, 7768, 21555)
+
+# Create the data frame
+State_pop <- data.frame(State = State, Totalcases = Totalcases,Deaths=deaths)
+
+map_chartone <- hcmap("https://code.highcharts.com/mapdata/countries/in/custom/in-all-andaman-and-nicobar.js", 
+                      data = State_pop,  
+                      value = "Deaths",
+                      joinBy = c("hc-a2", "State"),  
+                      name = "Covid Deaths", 
+                      dataLabels = list(enabled = TRUE, format = '{point.name}'),
+                      borderColor = "#FAFAFA",  
+                      borderWidth = 0.1,  
+                      tooltip = list(valueDecimals = 0)) %>% 
+  hc_colorAxis(
+    minColor = "#FAFAFA",  # Red color
+    maxColor = "#FF0000"   # Red color
+  )
+
+hc_mapNavigation(map_chartone, enabled = TRUE)
+
+
+                    
+  
+  
+```
+
+Column{.tabset .tabset-fade data-width=500}
+--------------------------------------------------------------
+
+### Covid-19 Cases(USA)
+
+```{r}
+
+usa <- read.csv("usadata.csv", header = TRUE)
+
+highchart() %>%
+  hc_add_series_map(
+    usgeojson,
+    usa,
+    name = "Covid Cases",
+    value = "Cases", # Specify the column containing the number of deaths
+    dataLabels = list(enabled = TRUE, format = '{point.name}'),
+    joinBy = c("woename", "State")
+  ) %>%
+  hc_mapNavigation(enabled = TRUE)
+
+
+  
+
+```
+
+
+### Covid-19 Deaths(USA)
+
+```{r}
+usa <- read.csv("usadata.csv", header = TRUE)
+
+highchart() %>%
+  hc_add_series_map(
+    usgeojson,
+    usa,
+    name = "Covid Deaths",
+    value = "Deaths", # Specify the column containing the number of deaths
+    dataLabels = list(enabled = TRUE, format = '{point.name}'),
+    joinBy = c("woename", "State")
+  ) %>%
+  hc_colorAxis(
+    minColor = "#FAFAFA",  # Red color
+    maxColor = "#FF0000"   # Red color
+  ) %>%
+  hc_mapNavigation(enabled = TRUE)
+
+
+```
+
+
+Datasets
+=====================================================
+
+Column{.tabset .tabset-fade}
+--------------------------------------------------------------
+
+
+### Daily Data
+
+```{r}
+# Load and display Dataset 1
+df1 <- read.csv("who.csv")
+datatable(df1)
+
+
+```
+
+
+### India Statewise Data
+
+```{r}
+# Load and display Dataset 1
+df1 <- read.csv("indiadata.csv")
+datatable(df1)
+
+
+```
+
+### Usa Statewise Data
+
+```{r}
+# Load and display Dataset 1
+df1 <- read.csv("usadata.csv")
+datatable(df1)
+
+
+```
+
+### Usa/India Overview Data
+
+```{r}
+# Load and display Dataset 1
+df1 <- read.csv("usd.csv")
+datatable(df1)
+
+
+```
+
+
